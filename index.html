@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Meme Detector</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    background: #1c1c1e; color: #eee;
+    font-family: -apple-system, "Segoe UI", Tahoma, sans-serif;
+    overflow: hidden;
+  }
+  #app {
+    display: flex; flex-direction: column;
+    width: 100%; height: 100vh;
+  }
+
+  /* ---------- شاشة البداية ---------- */
+  #startScreen {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 24px; text-align: center; gap: 16px;
+  }
+  #startScreen h1 { font-size: 22px; margin: 0; }
+  #startScreen p { color: #aaa; font-size: 14px; line-height: 1.6; margin: 0; }
+  #startBtn {
+    margin-top: 12px; padding: 14px 32px; font-size: 16px; font-weight: 600;
+    border: none; border-radius: 12px; background: #34c759; color: #042;
+    cursor: pointer;
+  }
+  #startBtn:active { opacity: 0.8; }
+  #errBox {
+    display: none; color: #ff6961; font-size: 13px; margin-top: 8px;
+    max-width: 320px;
+  }
+
+  /* ---------- شاشة الكاميرا الرئيسية ---------- */
+  #camScreen {
+    display: none; flex: 1; position: relative;
+    width: 100%; height: 100%; background: #000;
+  }
+  #video {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; transform: scaleX(-1); /* مرآة */
+  }
+  #overlay {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    pointer-events: none;
+  }
+
+  /* شاشة المعايرة */
+  #calOverlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 14px;
+    text-align: center; padding: 20px;
+  }
+  #calOverlay p { font-size: 16px; margin: 0; color: #ddd; }
+  #calBarTrack {
+    width: 240px; height: 14px; background: rgba(255,255,255,0.15);
+    border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.25);
+  }
+  #calBarFill {
+    height: 100%; width: 0%; background: #34c759;
+    transition: width 0.15s linear;
+  }
+  #calPct { font-size: 13px; color: #999; }
+
+  /* الـ HUD */
+  #hud {
+    position: absolute; top: 10px; right: 10px; left: 10px;
+    display: flex; flex-direction: column; gap: 6px;
+    pointer-events: none;
+  }
+  #hudName {
+    align-self: flex-end;
+    background: rgba(0,0,0,0.55); color: #56dc6e;
+    padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 600;
+  }
+  #hudName.neutral { color: #aaa; }
+
+  /* نافذة الميم */
+  #memeBox {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 38%; background: #0a0a0a;
+    border-top: 2px solid #2c2c2e;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  #memeImg { max-width: 100%; max-height: 100%; object-fit: contain; }
+  #memePlaceholder { color: #555; font-size: 13px; }
+
+  #closeBtn {
+    position: absolute; top: 10px; left: 10px; z-index: 5;
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(0,0,0,0.55); color: #ddd; border: none;
+    font-size: 16px; line-height: 34px; text-align: center; padding: 0;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- شاشة البداية -->
+  <div id="startScreen">
+    <h1>🎭 كاشف الميمات بالوجه واليد</h1>
+    <p>
+      افتح الكاميرا، اعمل وضع وجه محايد لثواني عشان نعاير الإحساس،
+      وبعدها جرب رفع حاجبك، طلّع لسانك، أو سوي إشارات بيدك.
+    </p>
+    <button id="startBtn">تشغيل الكاميرا</button>
+    <div id="errBox"></div>
+  </div>
+
+  <!-- شاشة الكاميرا -->
+  <div id="camScreen">
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="overlay"></canvas>
+
+    <button id="closeBtn">✕</button>
+
+    <div id="hud">
+      <div id="hudName" class="neutral">محايد</div>
+    </div>
+
+    <div id="calOverlay">
+      <p>انظر للأمام بوجه محايد 🙂</p>
+      <div id="calBarTrack"><div id="calBarFill"></div></div>
+      <div id="calPct">0%</div>
+    </div>
+
+    <div id="memeBox">
+      <div id="memePlaceholder">...بانتظار اكتشاف حركة</div>
+      <img id="memeImg" style="display:none" />
+    </div>
+  </div>
+
+</div>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
